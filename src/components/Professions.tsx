@@ -1,21 +1,24 @@
+// src/components/Professions.tsx
 import { useState, useEffect } from 'react';
+import type { BackendAnalysisResponse } from '../types'// Import from shared types
 
 type Props = {
   answers: string[];
-  userInfo: string; // Add userInfo to props
-  userSkills: string[]; // Add userSkills to props
+  userInfo: string;
+  userSkills: string[];
   setSelectedJob: (job: string) => void;
   onNext: () => void;
-  accessToken: string | null; // Add accessToken to props
+  accessToken: string | null;
+  setAnalysisData: (data: BackendAnalysisResponse) => void; // New prop
 };
 
-function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, accessToken }: Props) {
+function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, accessToken, setAnalysisData }: Props) {
   const [suggestedJobs, setSuggestedJobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfessions = async () => {
+    const fetchProfessionsAndAnalysis = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -28,7 +31,7 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
           body: JSON.stringify({
             skills: userSkills,
             about: userInfo,
-            questions: [], // The backend sample doesn't use these for suitable_professions, but include for completeness
+            questions: [],
             answers: answers,
           }),
         });
@@ -37,29 +40,24 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: BackendAnalysisResponse = await response.json();
         setSuggestedJobs(data.suitable_professions || []);
+        setAnalysisData(data); // Store the full analysis data in App's state
+
       } catch (e: any) {
-        setError(`Failed to fetch professions: ${e.message}`);
-        console.error("Error fetching professions:", e);
-        // Fallback to mock data if API fails
-        setSuggestedJobs([
-          'Frontend Developer',
-          'Backend Developer',
-          'UX Designer',
-          'Data Analyst',
-          'Marketing Specialist',
-          'Game Designer',
-          'Project Manager',
-          'Technical Writer',
-        ].slice(0, 5));
+        setError(`Failed to fetch professions and analysis: ${e.message}`);
+        console.error("Error fetching professions and analysis:", e);
+        setSuggestedJobs([ // Fallback suggestions
+          'Frontend Developer', 'Backend Developer', 'UX Designer', 'Data Analyst', 'Project Manager'
+        ]);
+        // analysisData will remain null, Dashboard will handle it
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfessions();
-  }, [answers, userInfo, userSkills, accessToken]);
+    fetchProfessionsAndAnalysis();
+  }, [answers, userInfo, userSkills, accessToken, setAnalysisData]);
 
   const handleClick = (job: string) => {
     setSelectedJob(job);
@@ -69,7 +67,7 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-xl border border-gray-200 animate-fade-in text-center">
-        <p className="text-xl font-medium text-blue-600">Загрузка подходящих профессий... 🚀</p>
+        <p className="text-xl font-medium text-blue-600">Загрузка подходящих профессий и анализ данных... 🚀</p>
       </div>
     );
   }
@@ -78,9 +76,9 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
     return (
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-xl border border-gray-200 animate-fade-in text-center">
         <p className="text-xl font-medium text-red-500">Ошибка: {error}</p>
-        <p className="text-gray-600 mt-2">Попробуйте еще раз или выберите из списка ниже.</p>
+        <p className="text-gray-600 mt-2">Попробуйте еще раз или выберите из списка ниже. Детальный анализ может быть недоступен.</p>
         <ul className="space-y-4 mt-6">
-          {suggestedJobs.map((job) => ( // Display fallback jobs if error
+          {suggestedJobs.map((job) => (
             <li key={job}>
               <button
                 onClick={() => handleClick(job)}
@@ -102,7 +100,7 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
         Твои потенциальные карьеры 🌟
       </h2>
       <p className="mb-6 text-gray-600 text-center">
-        Основываясь на твоих ответах, мы подобрали наиболее подходящие варианты:
+        Основываясь на твоих ответах и предварительном анализе, мы подобрали наиболее подходящие варианты:
       </p>
       <ul className="space-y-4">
         {suggestedJobs.length > 0 ? (
@@ -119,18 +117,17 @@ function Professions({ answers, userInfo, userSkills, setSelectedJob, onNext, ac
           ))
         ) : (
           <p className="text-center text-gray-500">
-            Не удалось найти конкретных предложений. Вот несколько общих вариантов:
+            Не удалось найти предложений. Попробуйте изменить ответы или выберите из стандартных опций.
           </p>
         )}
       </ul>
-      {/* If no suggestions from API, show all (or a default set) */}
-      {suggestedJobs.length === 0 && (
+      {suggestedJobs.length === 0 && !error && (
         <div className="mt-8 text-center">
           <button
-            onClick={() => handleClick('Frontend Developer')} // Default to a common job if no suggestions
+            onClick={() => handleClick('Frontend Developer')} // Default example
             className="text-blue-600 hover:underline text-sm"
           >
-            Показать все варианты
+            Выбрать Frontend Developer (Пример)
           </button>
         </div>
       )}

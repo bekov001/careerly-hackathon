@@ -1,32 +1,33 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
-import './App.css'; // Import global styles
+import './App.css';
 
-// Import your components
 import Intro from './components/Intro';
 import Questions from './components/Questions';
 import Skills from './components/Skills';
-import Professions from './components/Professions'; // Import Professions
-import Dashboard from './components/Dashboard'; // Import Dashboard
-import AuthModal from './components/AuthModal'; // Authentication modal
-import Header from './components/UI/Header'; // Application header
-import AIAssistantButton from './components/UI/AIAssistantButton'; // AI Assistant button
+import Professions from './components/Professions';
+import Dashboard from './components/Dashboard';
+import AuthModal from './components/AuthModal';
+import Header from './components/UI/Header';
+import AIAssistantButton from './components/UI/AIAssistantButton';
+
+import type { BackendAnalysisResponse } from './types'; // Import from shared types
 
 function App() {
-  const [step, setStep] = useState(1); // Current step in the user flow
-  const [userInfo, setUserInfo] = useState(''); // Stores the "About Me" text
-  const [questions, setQuestions] = useState<string[]>([]); // Stores generated questions
-  const [answers, setAnswers] = useState<string[]>([]); // Stores user answers to questions
-  const [userSkills, setUserSkills] = useState<string[]>([]); // Stores user's selected skills
-  const [selectedJob, setSelectedJob] = useState<string | null>(null); // Stores the selected job/profession
+  const [step, setStep] = useState(1);
+  const [userInfo, setUserInfo] = useState('');
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isAIOpen, setIsAIOpen] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Tracks user's login status
-  const [showAuthModal, setShowAuthModal] = useState(false); // Controls visibility of the authentication modal
-  const [accessToken, setAccessToken] = useState<string | null>(null); // Stores the user's access token
+  // New state for storing the full analysis data
+  const [analysisData, setAnalysisData] = useState<BackendAnalysisResponse | null>(null);
 
-  const [isAIOpen, setIsAIOpen] = useState(false); // State for AI assistant chat window
-
-  // Effect to check login status from localStorage on app load
   useEffect(() => {
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
@@ -36,51 +37,42 @@ function App() {
     }
   }, []);
 
-  // Callback for successful authentication (login or registration)
   const handleAuthSuccess = (tokens: { access: string; refresh: string }) => {
     setAccessToken(tokens.access);
     setIsLoggedIn(true);
     localStorage.setItem('accessToken', tokens.access);
     localStorage.setItem('refreshToken', tokens.refresh);
     setShowAuthModal(false);
-
-    // If we were on the intro step and userInfo is set, advance to questions
     if (step === 1 && userInfo) {
       setStep(2);
     }
   };
 
-  // Callback for user logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     setAccessToken(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    // Reset the wizard
     setStep(1);
     setUserInfo('');
     setQuestions([]);
     setAnswers([]);
     setUserSkills([]);
     setSelectedJob(null);
+    setAnalysisData(null); // Reset analysis data on logout
   };
 
-  // Render the component for the current step
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <Intro
-        // Pass userInfo
             setUserInfo={setUserInfo}
             accessToken={accessToken}
-            onNext={(isValid, errorMessage) => {
+            onNext={(isValid) => {
               if (isValid) {
-                if (isLoggedIn) {
-                  setStep(2);
-                } else {
-                  setShowAuthModal(true);
-                }
+                if (isLoggedIn) setStep(2);
+                else setShowAuthModal(true);
               }
             }}
           />
@@ -101,11 +93,12 @@ function App() {
         return (
           <Professions
             answers={answers}
-            userInfo={userInfo} // Pass userInfo here
-            userSkills={userSkills} // Pass userSkills here
+            userInfo={userInfo}
+            userSkills={userSkills}
             setSelectedJob={setSelectedJob}
             onNext={() => setStep(5)}
-            accessToken={accessToken} // Pass accessToken here
+            accessToken={accessToken}
+            setAnalysisData={setAnalysisData} // Pass the setter function
           />
         );
       case 5:
@@ -116,6 +109,7 @@ function App() {
             answers={answers}
             userSkills={userSkills}
             accessToken={accessToken}
+            analysisData={analysisData} // Pass the fetched analysis data
           />
         );
       default:
@@ -125,21 +119,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center relative overflow-hidden font-inter">
-      {/* Header with login/logout controls */}
       <Header
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
         onLoginClick={() => setShowAuthModal(true)}
       />
-
-      {/* Main content */}
       <div className="w-full max-w-4xl relative mt-8">
         <div key={step} className="component-enter">
           {renderStep()}
         </div>
       </div>
-
-      {/* Auth modal */}
       {showAuthModal && (
         <AuthModal
           isOpen={showAuthModal}
@@ -147,8 +136,6 @@ function App() {
           onAuthSuccess={handleAuthSuccess}
         />
       )}
-
-      {/* AI assistant */}
       <AIAssistantButton isOpen={isAIOpen} setIsOpen={setIsAIOpen} />
     </div>
   );
