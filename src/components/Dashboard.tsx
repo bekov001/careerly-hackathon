@@ -476,8 +476,7 @@ function Dashboard({ job, userInfo, answers, userSkills, accessToken }: Props) {
             <p className="text-center text-gray-500 md:col-span-2">Вакансии для данной профессии не найдены.</p>
           )}
         </div>
-        <p className="mt-6 text-center text-gray-500 text-sm italic">Обрати внимание: это примеры вакансий. Для более точного поиска используй фильтры на hh.kz.</p>
-      </div>
+       </div>
 
       <div className="mt-8 text-center">
         {currentPdfLink ? (
