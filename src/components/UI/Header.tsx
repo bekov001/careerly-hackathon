@@ -22,14 +22,14 @@ function Header({ isLoggedIn, onLogout, onLoginClick }: HeaderProps) {
           onClick={onLogout}
           className="bg-red-600 hover:bg-red-700 text-white py-2.5 px-6 rounded-full text-base font-medium transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-300"
         >
-          Выйти
+          Logout
         </button>
       ) : (
         <button
           onClick={onLoginClick} // Call the new onLoginClick prop
           className="bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-6 rounded-full text-base font-medium transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300"
         >
-          Войти
+          Login
         </button>
       )}
     </header>

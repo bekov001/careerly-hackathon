@@ -80,8 +80,8 @@ function Questions({ userInfo, setQuestions, setAnswers, onNext, accessToken }: 
           <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce-dot" style={{ animationDelay: '0.2s' }}></div>
           <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce-dot" style={{ animationDelay: '0.4s' }}></div>
         </div>
-        <p className="text-lg font-semibold text-gray-700">ИИ обдумывает вопросы...</p>
-        <style jsx>{`
+        <p className="text-lg font-semibold text-gray-700">We are thinking...</p>
+        <style>{`
           @keyframes bounce-dot {
             0%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-10px); }
@@ -117,7 +117,7 @@ function Questions({ userInfo, setQuestions, setAnswers, onNext, accessToken }: 
     <div className="max-w-xl mx-auto bg-white p-8 rounded shadow-lg border border-gray-200 animate-fade-in">
       <div className="text-center mb-6">
         <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-          Вопрос {currentIndex + 1} из {questions.length}
+          Question {currentIndex + 1} out of {questions.length}
         </span>
       </div>
       <h2 className="text-xl font-bold mb-6 text-gray-800 text-center animate-slide-in-up">

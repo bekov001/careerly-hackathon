@@ -1,0 +1,30 @@
+functionsDirectory = "C:\\Users\\1\\Desktop\\anuarka\\kimep_hackathon\\netlify\\functions"
+functionsDirectoryOrigin = "ui"
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "C:\\Users\\1\\Desktop\\anuarka\\kimep_hackathon\\dist"
+publishOrigin = "ui"
+commandOrigin = "ui"
+command = "npm run build"
+functions = "C:\\Users\\1\\Desktop\\anuarka\\kimep_hackathon\\netlify\\functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]

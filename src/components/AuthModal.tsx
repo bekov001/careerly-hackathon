@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// Make sure to import all necessary authentication functions
+// Убедитесь, что импортированы все необходимые функции аутентификации
 import { registerUser, loginUser, loginWithGoogleBackend } from '../api/auth';
 import { signInWithGoogle } from '../api/firebaseAuth';
 
@@ -8,13 +8,13 @@ type AuthMode = 'login' | 'register';
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  // This prop expects an object containing both access and refresh tokens
+  // Этот пропс ожидает объект, содержащий как access, так и refresh токены
   onAuthSuccess: (tokens: { access: string; refresh: string }) => void;
 };
 
 function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
   const [mode, setMode] = useState<AuthMode>('login');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // Используется как email или имя пользователя в зависимости от бэкенда
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -22,7 +22,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
 
   if (!isOpen) return null;
 
-  // Unified submit: handles both login and register + auto-login
+  // Унифицированная функция отправки: обрабатывает как вход, так и регистрацию + авто-вход
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -37,32 +37,31 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
           setLoading(false);
           return;
         }
-        // Auto-login after successful registration
+        // Автоматический вход после успешной регистрации
         const loginResult = await loginUser(username, password);
         setLoading(false);
         if (loginResult.success && loginResult.token) {
           setSuccessMessage('Регистрация и вход выполнены успешно!');
           onAuthSuccess(loginResult.token);
-          onClose();
+          onClose(); // Закрываем модальное окно после успешной аутентификации
         } else {
           setError(loginResult.message || 'Ошибка при автоматическом входе после регистрации.');
         }
       } else {
-        // Traditional login
+        // Обычный вход
         const loginResult = await loginUser(username, password);
         setLoading(false);
         if (loginResult.success && loginResult.token) {
           setSuccessMessage(loginResult.message);
           onAuthSuccess(loginResult.token);
-          // Optionally close modal here
-          onClose();
+          onClose(); // Закрываем модальное окно после успешной аутентификации
         } else {
           setError(loginResult.message);
         }
       }
     } catch (err) {
       setLoading(false);
-      console.error('Error during auth submission:', err);
+      console.error('Ошибка при отправке аутентификации:', err);
       setError('Произошла ошибка при подключении к серверу. Попробуйте снова.');
     }
   };
@@ -80,7 +79,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
         if (backendAuthResult.success && backendAuthResult.token) {
           setSuccessMessage(backendAuthResult.message);
           onAuthSuccess(backendAuthResult.token);
-          onClose();
+          onClose(); // Закрываем модальное окно после успешной аутентификации
         } else {
           setError(backendAuthResult.message);
         }
@@ -88,7 +87,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
         setError(firebaseResult.message);
       }
     } catch (err) {
-      console.error('Error during Google sign-in process:', err);
+      console.error('Ошибка в процессе входа через Google:', err);
       setError('Произошла ошибка при входе через Google. Попробуйте снова.');
     } finally {
       setLoading(false);
@@ -149,7 +148,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }: Props) {
           className="w-full flex items-center justify-center border px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading}
         >
-          {loading ? 'Загрузка...' : <><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" className="w-5 h-5 mr-2"/>Войти через Google</>}
+          {loading ? 'Загрузка...' : <><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Иконка Google" className="w-5 h-5 mr-2"/>Войти через Google</>}
         </button>
 
         <p className="text-center text-gray-600 mt-4">
